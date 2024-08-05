@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    .outer {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .inner {
+        width: 45%;
+        border: 1px solid black;
+        padding: 10px;
+        word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <script type="module" src="/main.js"></script>
+  <h1>zk-KYC app</h1>
+  <h2>Check age</h2>
+  <div class="outer">
+    <div id="age-prover" class="inner"><h2>Prover</h2></div>
+    <div id="age-verifier" class="inner"><h2>Verifier</h2></div>
+  </div>
+  <h2>Check country</h2>
+  <div class="outer">
+    <div id="country-prover" class="inner"><h2>Prover</h2></div>
+    <div id="country-verifier" class="inner"><h2>Verifier</h2></div>
+  </div>
+  <h2>Check salary</h2>
+  <div class="outer">
+    <div id="salary-prover" class="inner"><h2>Prover</h2></div>
+    <div id="salary-verifier" class="inner"><h2>Verifier</h2></div>
+  </div>
+</body>
+</html>
