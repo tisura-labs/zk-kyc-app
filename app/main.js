@@ -1,8 +1,8 @@
 import { BarretenbergBackend, BarretenbergVerifier as Verifier } from '@noir-lang/backend_barretenberg';
 import { Noir } from '@noir-lang/noir_js';
-import check_age from '../circuits/check_age/target/check_age.json';
-import check_country from '../circuits/check_country/target/check_country.json';
-import check_salary from '../circuits/check_salary/target/check_salary.json';
+import check_age from './circuits/check_age/target/check_age.json';
+import check_country from './circuits/check_country/target/check_country.json';
+import check_salary from './circuits/check_salary/target/check_salary.json';
 
 
 const setup = async () => {
@@ -104,6 +104,7 @@ function createInputArea(key) {
     input.id = inputId;
     input.type = 'text';
     input.placeholder = placeholder;
+    input.style = key === 'salary' ? "width: 260px;" : "width: 130px;"
 
     const button = document.createElement('button');
     const buttonId = "submit" + keyCapitalized;
@@ -174,7 +175,7 @@ async function proveKeyCheck(key) {
         const keyCapitalized = capitalize(key);
         const inputId = "guess" + keyCapitalized;
 
-        const value = parseInt(document.getElementById(inputId).value);
+        const value = document.getElementById(inputId).value;
         const input = getInputData(key, value);
 
         await setup();
