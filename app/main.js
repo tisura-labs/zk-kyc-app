@@ -1,11 +1,15 @@
 import { BarretenbergBackend, BarretenbergVerifier as Verifier } from '@noir-lang/backend_barretenberg';
 import { Noir } from '@noir-lang/noir_js';
+import { hashMessage, getBytes } from 'ethers';
+import { SimpleMerkleTree } from '@openzeppelin/merkle-tree';
+import sha256 from 'crypto-js/sha256';
+import encHex from 'crypto-js/enc-hex';
 import check_age from './circuits/check_age/target/check_age.json';
 import check_country from './circuits/check_country/target/check_country.json';
 import check_salary from './circuits/check_salary/target/check_salary.json';
 
 
-const setup = async () => {
+async function setup() {
     await Promise.all([
         import('@noir-lang/noirc_abi').then((module) =>
         module.default(new URL('@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm', import.meta.url).toString()),
@@ -13,7 +17,9 @@ const setup = async () => {
         import('@noir-lang/acvm_js').then((module) =>
         module.default(new URL('@noir-lang/acvm_js/web/acvm_js_bg.wasm', import.meta.url).toString()),
         ),
-    ]);
+    ]).catch((err) => {
+        console.error('Error loading modules:', err);
+    });
 };
   
 function display(container, msg) {
@@ -65,7 +71,44 @@ function getCircuit(key) {
     }
 }
 
+async function prepareMembershipInputs() {
+    let message = 'b';
+    let index = 1;
+
+    let hashedMessage = hashMessage(message);
+    let hashedMessageBytes = getBytes(hashedMessage);
+
+    const messages = ['a', 'b', 'c', 'd'];
+    const hashes = [];
+    messages.forEach(message => {
+        const hash = sha256(message);
+        const hashHex = hash.toString(encHex);
+        const hashBytes = getBytes(`0x${hashHex}`);
+        hashes.push(hashBytes);
+    });
+    const tree = SimpleMerkleTree.of(hashes);
+    const hashpath = tree.getProof(index);
+    // const hashpathBytes = [];
+    // hashpath.forEach(elt => {
+    //     hashpathBytes.push(getBytes(elt));
+    // });
+    const root = tree.root;
+    
+    console.log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+    console.log(message);
+    console.log(hashedMessage);
+    console.log(hashedMessageBytes);
+    console.log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+    console.log(hashpath);
+    // console.log(hashpathBytes);
+    console.log(root);
+    console.log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+
+    return { message, index, hashpath, root }
+}
+
 function getInputData(key, value) {
+    prepareMembershipInputs();
     switch (key) {
         case "age":
             const ageValue = Number(value);
@@ -86,6 +129,8 @@ function getInputData(key, value) {
                 throw new Error("Invalid input for salary; please enter three numbers separated by commas.");
             }
             return { salary: valuesArray, threshold: 100 };
+        // case "membership":
+        //     return prepareMembershipInputs();
         default:
             throw new Error("Invalid key for input data");
     }
@@ -178,8 +223,6 @@ async function proveKeyCheck(key) {
         const value = document.getElementById(inputId).value;
         const input = getInputData(key, value);
 
-        await setup();
-
         display(proverDivId, '⌛ Generating proof...');
         const { witness } = await noir.execute(input);
         const proof = await backend.generateProof(witness);
@@ -194,6 +237,7 @@ async function proveKeyCheck(key) {
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+    await setup();
     ["age", "country", "salary"].forEach(createInputArea);
 });
