@@ -11,6 +11,9 @@
   "dependencies": {
     "@noir-lang/backend_barretenberg": "^0.32.0",
     "@noir-lang/noir_js": "^0.32.0",
+    "@openzeppelin/merkle-tree": "^1.0.7",
+    "crypto-js": "^4.2.0",
+    "ethers": "^6.13.2",
     "preact": "^10.22.1"
   },
   "devDependencies": {
