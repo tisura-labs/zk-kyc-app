@@ -8,19 +8,36 @@ import check_salary from './circuits/check_salary/target/check_salary.json';
 const setup = async () => {
     await Promise.all([
         import('@noir-lang/noirc_abi').then((module) =>
-        module.default(new URL('@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm', import.meta.url).toString()),
+            module.default(new URL('@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm', import.meta.url).toString()),
         ),
         import('@noir-lang/acvm_js').then((module) =>
-        module.default(new URL('@noir-lang/acvm_js/web/acvm_js_bg.wasm', import.meta.url).toString()),
+            module.default(new URL('@noir-lang/acvm_js/web/acvm_js_bg.wasm', import.meta.url).toString()),
         ),
     ]);
 };
   
 function display(container, msg) {
     const c = document.getElementById(container);
+    const logArea = c.querySelector('.log-area');
     const p = document.createElement('p');
     p.textContent = msg;
-    c.appendChild(p);
+    logArea.appendChild(p);
+}
+
+function clearLogs(containerId, clearInput=false) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        const logArea = container.querySelector('.log-area');
+        if (logArea) {
+            logArea.innerHTML = '';
+        }
+        if (clearInput) {
+            const inputArea = container.querySelector('.input-area');
+            if (inputArea) {
+                inputArea.innerHTML = '';
+            }
+        }
+    }
 }
 
 function capitalize(s) {
@@ -49,7 +66,9 @@ function createCopyButton(container, textToCopy) {
             console.error('Failed to copy proof: ', err);
         });
     });
-    document.getElementById(container).appendChild(button);
+    const c = document.getElementById(container);
+    const logArea = c.querySelector('.log-area');
+    logArea.appendChild(button);
 }
 
 function getCircuit(key) {
@@ -116,14 +135,32 @@ function createInputArea(key) {
     inputArea.appendChild(button);
     
     const proverContainer = document.getElementById(proverDivId);
+
+    // Create a separate log area within the prover container
+    const logArea = document.createElement('div');
+    logArea.className = 'log-area';
+
     proverContainer.appendChild(inputArea);
+    proverContainer.appendChild(logArea);
     
-    button.addEventListener('click', () => proveKeyCheck(key));
+    button.addEventListener('click', () => {
+        clearLogs(proverDivId);
+        proveKeyCheck(key);
+    });
 }
 
 function createVerifierInput(key, backend) {
     const keyCapitalized = capitalize(key);
     const verifierContainer = document.getElementById(key + '-verifier');
+
+    clearLogs(key + '-verifier', true);
+
+    let inputArea = verifierContainer.querySelector('.input-area');
+    if (!inputArea) {
+        inputArea = document.createElement('div');
+        inputArea.className = 'input-area';
+        verifierContainer.appendChild(inputArea);
+    }
 
     // Create input element for proof
     const proofInput = document.createElement('input');
@@ -131,15 +168,25 @@ function createVerifierInput(key, backend) {
     proofInput.id = inputId;
     proofInput.type = 'text';
     proofInput.placeholder = 'Enter proof';
-    verifierContainer.appendChild(proofInput);
+    inputArea.appendChild(proofInput);
 
     // Create submit button for proof verification
     const verifyButton = document.createElement('button');
     verifyButton.textContent = 'Submit Proof';
-    verifierContainer.appendChild(verifyButton);
+    inputArea.appendChild(verifyButton);
+
+    let logArea = verifierContainer.querySelector('.log-area');
+    if (!logArea) {
+        logArea = document.createElement('div');
+        logArea.className = 'log-area';
+        verifierContainer.appendChild(logArea);
+    }
 
     // Add event listener to verify the proof
-    verifyButton.addEventListener('click', async () => verifyKeyCheck(key, backend));
+    verifyButton.addEventListener('click', async () => {
+        clearLogs(key + '-verifier');
+        verifyKeyCheck(key, backend);
+    });
 }
 
 async function verifyKeyCheck(key, backend) {
@@ -147,6 +194,7 @@ async function verifyKeyCheck(key, backend) {
     const inputId = "enter" + keyCapitalized + "Proof";
     const verifierDivId = key + '-verifier';
 
+    clearLogs(verifierDivId);
     display(verifierDivId, '⌛ Verifying proof...');
     const proofValue = document.getElementById(inputId).value;
     try {
@@ -167,6 +215,7 @@ async function verifyKeyCheck(key, backend) {
 
 async function proveKeyCheck(key) {
     const proverDivId = key + '-prover';
+    clearLogs(proverDivId);
     try {
         const circuit = getCircuit(key);
         const backend = new BarretenbergBackend(circuit);
