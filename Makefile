@@ -11,3 +11,8 @@ install :; \
 start :; \
         cd app && \
         npm run dev
+
+deploy :; \
+        cd app && \
+        npm run build && \
+        surge dist graceful-believe.surge.sh
