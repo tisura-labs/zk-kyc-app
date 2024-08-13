@@ -43,5 +43,5 @@ make install
 ### Run app locally
 
 ```bash
-make install
+make start
 ```
