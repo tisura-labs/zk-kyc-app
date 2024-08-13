@@ -3,7 +3,7 @@
 *This project is supported by a grant from the [ZK Grants Round](https://blog.ethereum.org/2024/06/25/zk-grants-round-announce) funded by Aztec, Ethereum Foundation, Polygon, Scroll, Taiko, and Zk Sync.*
 
 
-This repository comes with [a blog post](insert-a-link) that provides more details about its content and the concepts.
+This repository comes with [a blog post](https://medium.com/@tisura/build-a-zk-kyc-app-with-noir-d7b4c684795c) that provides more details about its content and the concepts.
 
 ## Description
 
