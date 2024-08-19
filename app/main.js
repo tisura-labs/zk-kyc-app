@@ -104,7 +104,7 @@ function getInputData(key, value) {
             if (valuesArray.length !== 3 || valuesArray.some(isNaN)) {
                 throw new Error("Invalid input for salary; please enter three numbers separated by commas.");
             }
-            return { salary: valuesArray, threshold: 100 };
+            return { salary: valuesArray, threshold: 1000 };
         default:
             throw new Error("Invalid key for input data");
     }
